@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Canva + música de fondo</title>
+  <style>
+    /* Botón fijo y discreto */
+    .audio-toggle {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 999px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.15);
+      background: #111;
+      color: #fff;
+      font: 600 14px/1 system-ui, -apple-system, Segoe UI, Roboto;
+      cursor: pointer;
+      z-index: 9999;
+    }
+    .audio-toggle[aria-pressed="true"]::before { content: "⏸️ "; }
+    .audio-toggle[aria-pressed="false"]::before { content: "▶️ "; }
+
+    /* El iframe ocupa toda la pantalla */
+    .stage {
+      position: fixed;
+      inset: 0;
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div style="position: relative; width: 100%; height: 0; padding-top: 140.0000%;
+ padding-bottom: 0; box-shadow: 0 2px 8px 0 rgba(63,69,81,0.16); margin-top: 1.6em; margin-bottom: 0.9em; overflow: hidden;
+ border-radius: 8px; will-change: transform;">
+  <iframe loading="lazy" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; border: none; padding: 0;margin: 0;"
+    src="https://www.canva.com/design/DAGzKcUFt1U/U35s7pnuPLABRMuMQCz5dA/view?embed" allowfullscreen="allowfullscreen" allow="fullscreen">
+  </iframe>
+</div>
+<a href="https:&#x2F;&#x2F;www.canva.com&#x2F;design&#x2F;DAGzKcUFt1U&#x2F;U35s7pnuPLABRMuMQCz5dA&#x2F;view?utm_content=DAGzKcUFt1U&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Invitación Boda Massi &amp; Benja</a> por Wyatt Rafael (no que no perros?)
+
+  <!-- Audio de fondo (oculto). Cambia src a tu archivo -->
+  <audio id="bgm" src="assets/musica-romantica.mp3" loop preload="auto"></audio>
+
+  <!-- Botón de Play/Pause que inicia el audio tras el primer gesto -->
+  <button id="audioBtn" class="audio-toggle" aria-pressed="false">Música</button>
+
+  <script>
+    const audio = document.getElementById('bgm');
+    const btn   = document.getElementById('audioBtn');
+
+    // iOS/Android: sólo arrancará tras interacción del usuario
+    async function startAudio() {
+      try {
+        await audio.play();
+        btn.setAttribute('aria-pressed', 'true');
+      } catch (err) {
+        // Si falla, pide interacción explícita
+        console.debug('Autoplay bloqueado:', err);
+      }
+    }
+
+    // Primer gesto en la página = intentar reproducir
+    const unlock = () => {
+      startAudio();
+      document.removeEventListener('pointerdown', unlock, { once: true });
+    };
+    document.addEventListener('pointerdown', unlock, { once: true });
+
+    // Toggle manual Play/Pause
+    btn.addEventListener('click', async () => {
+      if (audio.paused) {
+        await startAudio();
+      } else {
+        audio.pause();
+        btn.setAttribute('aria-pressed', 'false');
+      }
+    });
+
+    // Opcional: pausa al cambiar de pestaña para no molestar
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && !audio.paused) audio.pause();
+    });
+
+    // Volumen inicial suave (ajústalo a gusto)
+    audio.volume = 0.6;
+  </script>
+</body>
+</html>
